@@ -7,6 +7,7 @@
     <script src="scripts/showdown.min.js"></script>
     <link rel="stylesheet" type="text/css" href="style.css">
     <link rel="stylesheet" href="css/bg_load.css">
+    <meta name="viewport" content="width=device-width, inital-scale=1">
     <link rel="icon" type="image/x-icon" href="favicon.ico">
 
     <script type=module>
@@ -1192,7 +1193,7 @@
                 select_selected_character(this_chid);
             }
             $("#send_textarea").keypress(function (e) {
-                if(e.which === 13 && !e.shiftKey && is_send_press == false) {
+                if(e.which === 13 && e.shiftKey && is_send_press == false) {
                     is_send_press = true;
                     e.preventDefault();
                     Generate();
