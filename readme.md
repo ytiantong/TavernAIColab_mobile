@@ -1,4 +1,7 @@
-### WIP
+### Changelog
+
+- Pressing enter now starts a new line instead of sending the message
+- Made the main UI scale with mobile devices
 
 ### TavernAI is a adventure atmospheric chat (KoboldAI, NovelAI, Pygmalion)
 Examples of interface and output:
