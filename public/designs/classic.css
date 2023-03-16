@@ -32,7 +32,7 @@ body {
 }
 #chloe_star_dust_city {
     width: 80%;
-    opacity:0.7; 
+    opacity:0.6; 
     display:block;
     border-radius:5px;
     margin-top:25px;
@@ -985,7 +985,6 @@ input[type=submit], input[type=button] {
     z-index: 2095;
 }
 #colab_shadow_popup {
-    display: block;
     z-index: 2298;
 }
 #colab_popup_text {
@@ -1421,38 +1420,33 @@ input[type="range"]::-ms-thumb {
 
 /****Mes edit****/
 .mes_edit {
-    display: inline-block;
-    float:right;
-    /* right:8px; */
+    display: block;
     cursor:pointer;
     margin-right: 4px;
     opacity:0.07;
+    position: absolute;
+    top: 1ex;
+    right: 1ex;
 }
 .mes_edit img {
     width:20px;
     height:20px;
 }
-.mes_edit_done {
+.edit_block {
+    position: absolute;
+    top: 1ex;
+    right: 1ex;
     display: none;
-    float:right;
-    right:8px;
+    height: 2em;
+    white-space: nowrap;
+}
+.edit_block div {
+    display: inline;
     cursor:pointer;
-    margin-right: 15px;
+    margin-left: .75ex;
     opacity:0.5;
 }
-.mes_edit_done img {
-    width: 23px;
-    height: 23px;
-}
-.mes_edit_cancel {
-    display: none;
-    float:right;
-    /* right:8px; */
-    margin-right: 4px;
-    cursor:pointer;
-    opacity:0.5;
-}
-.mes_edit_cancel img {
+.edit_block div img {
     width: 23px;
     height: 23px;
 }
@@ -1854,6 +1848,18 @@ label.checkbox :checked + span:after {
     }
 }
 
+@media screen and (max-width: 450px) {
+    html,
+    body {
+      margin: 0;
+      overflow-x: hidden;
+    }
+    .nav {
+      width: 100%;
+      box-shadow: none
+    }
+}
+
 
 
 
@@ -2209,62 +2215,15 @@ label.checkbox :checked + span:after {
     font-weight: 900;
     cursor: pointer;
 }
-
-@media screen and (max-width: 450px) {
-    html,
-    body {
-      margin: 0;
-      overflow-x: hidden;
-    }
-    .nav {
-      width: 100%;
-      min-width: auto;
-      box-shadow: none
-    }
-    #bg_menu {
-        position: relative;
-    }
-    #chara_cloud{
-        width: 90%;
-        height: 100vh;
-        overflow: hidden;
-        overflow-y: scroll;
-        margin-left: 5%;/*170px;*/  
-    }
-    .characloud_character_block_card .avatar {
-        padding: 0px;
-        border-radius: 5px;
-        width: 150px;
-        height: 150px;
-        position: relative; /* make the avatar container position:relative */
-        overflow: hidden; /* hide the overflow of the box-shadow */
-    }
-    .characloud_characters_row {
-        position: relative;
-        overflow-x: scroll;
-        height: 240px;/*height: 345px;*/
-        margin-bottom: 35px;
-        background-color: #ffffff22;
-        padding: 8px;
-        padding-top: 30px;
-        border-radius: 10px;
-    }
-    .characloud_swipe_rigth, .characloud_swipe_left{
-        display: none;
-    }
-    .characloud_character_block_card{
-        height: 200px;
-        overflow-y: scroll;
-    }
-    .characloud_character_block_name{
-        bottom: 30px;
-    }
-    .characloud_character_block_description {
-        top: 75%;
-        font-size: 13px;
-        word-wrap: break-word;
-    }
-    #master_settings_toggle_block{
-        display: list-item;
-    }
+/*searchbox*/
+#search_bar {
+    display: none;
+    width: 150px;
+    position: sticky;
+    top: 0px;
+    z-index: 100;
+    margin-left: 8px;
+}
+#search_bar::placeholder  {
+    color: white;
 }

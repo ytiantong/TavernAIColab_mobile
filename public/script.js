@@ -29,17 +29,6 @@ $(document).ready(function(){
     const config = { childList: true, subtree: true, attributes: true, attributeFilter: ['src'] };
     observer.observe(document.body, config);
     */
-
-    var isMobile = false; //initiate as false
-    // device detection
-    if (/Mobi|Android/i.test(navigator.userAgent)) {
-        isMobile = true;
-    }
-    //if(/(android|bb\d+|meego).+mobile|avantgo|bada\/|blackberry|blazer|compal|elaine|fennec|hiptop|iemobile|ip(hone|od)|ipad|iris|kindle|Android|Silk|lge |maemo|midp|mmp|netfront|opera m(ob|in)i|palm( os)?|phone|p(ixi|re)\/|plucker|pocket|psp|series(4|6)0|symbian|treo|up\.(browser|link)|vodafone|wap|windows (ce|phone)|xda|xiino/i.test(navigator.userAgent) 
-    //    || /1207|6310|6590|3gso|4thp|50[1-6]i|770s|802s|a wa|abac|ac(er|oo|s\-)|ai(ko|rn)|al(av|ca|co)|amoi|an(ex|ny|yw)|aptu|ar(ch|go)|as(te|us)|attw|au(di|\-m|r |s )|avan|be(ck|ll|nq)|bi(lb|rd)|bl(ac|az)|br(e|v)w|bumb|bw\-(n|u)|c55\/|capi|ccwa|cdm\-|cell|chtm|cldc|cmd\-|co(mp|nd)|craw|da(it|ll|ng)|dbte|dc\-s|devi|dica|dmob|do(c|p)o|ds(12|\-d)|el(49|ai)|em(l2|ul)|er(ic|k0)|esl8|ez([4-7]0|os|wa|ze)|fetc|fly(\-|_)|g1 u|g560|gene|gf\-5|g\-mo|go(\.w|od)|gr(ad|un)|haie|hcit|hd\-(m|p|t)|hei\-|hi(pt|ta)|hp( i|ip)|hs\-c|ht(c(\-| |_|a|g|p|s|t)|tp)|hu(aw|tc)|i\-(20|go|ma)|i230|iac( |\-|\/)|ibro|idea|ig01|ikom|im1k|inno|ipaq|iris|ja(t|v)a|jbro|jemu|jigs|kddi|keji|kgt( |\/)|klon|kpt |kwc\-|kyo(c|k)|le(no|xi)|lg( g|\/(k|l|u)|50|54|\-[a-w])|libw|lynx|m1\-w|m3ga|m50\/|ma(te|ui|xo)|mc(01|21|ca)|m\-cr|me(rc|ri)|mi(o8|oa|ts)|mmef|mo(01|02|bi|de|do|t(\-| |o|v)|zz)|mt(50|p1|v )|mwbp|mywa|n10[0-2]|n20[2-3]|n30(0|2)|n50(0|2|5)|n7(0(0|1)|10)|ne((c|m)\-|on|tf|wf|wg|wt)|nok(6|i)|nzph|o2im|op(ti|wv)|oran|owg1|p800|pan(a|d|t)|pdxg|pg(13|\-([1-8]|c))|phil|pire|pl(ay|uc)|pn\-2|po(ck|rt|se)|prox|psio|pt\-g|qa\-a|qc(07|12|21|32|60|\-[2-7]|i\-)|qtek|r380|r600|raks|rim9|ro(ve|zo)|s55\/|sa(ge|ma|mm|ms|ny|va)|sc(01|h\-|oo|p\-)|sdk\/|se(c(\-|0|1)|47|mc|nd|ri)|sgh\-|shar|sie(\-|m)|sk\-0|sl(45|id)|sm(al|ar|b3|it|t5)|so(ft|ny)|sp(01|h\-|v\-|v )|sy(01|mb)|t2(18|50)|t6(00|10|18)|ta(gt|lk)|tcl\-|tdg\-|tel(i|m)|tim\-|t\-mo|to(pl|sh)|ts(70|m\-|m3|m5)|tx\-9|up(\.b|g1|si)|utst|v400|v750|veri|vi(rg|te)|vk(40|5[0-3]|\-v)|vm40|voda|vulc|vx(52|53|60|61|70|80|81|83|85|98)|w3c(\-| )|webc|whit|wi(g |nc|nw)|wmlb|wonu|x700|yas\-|your|zeto|zte\-/i.test(navigator.userAgent.substr(0,4))) { 
-    //    isMobile = true;
-    //}
-
     //CharaCloud
     var charaCloud = charaCloudClient.getInstance();
     var characloud_characters = [];
@@ -155,6 +144,7 @@ $(document).ready(function(){
     
     var lock_context_size = false;
     var multigen = false;
+    var singleline = false;
     var swipes = false;
     var keep_dialog_examples = false;
     var free_char_name_mode = false;
@@ -450,7 +440,7 @@ $(document).ready(function(){
         characters.forEach(function(item, i, arr) {
             var this_avatar = default_avatar;
             if(item.avatar != 'none'){
-                this_avatar = "characters/"+item.avatar;
+                this_avatar = "characters/"+item.avatar+"?v="+Date.now();
 
             }
             $("#rm_print_charaters_block").prepend('<div class=character_select chid='+i+'><div class=avatar><img src="'+this_avatar+'"></div><div class=ch_name_menu>'+item.name+'</div></div>');
@@ -480,6 +470,7 @@ $(document).ready(function(){
 
             for(var i = 0; i < load_ch_count.length;i++){
 
+
                 characters[i] = [];
                 characters[i] = getData[i];
                 
@@ -488,6 +479,7 @@ $(document).ready(function(){
                 }
             }
             characters.sort((a,b) =>  a.add_date - b.add_date );
+            //characters.sort((a, b) => (a.name.toLowerCase() > b.name.toLowerCase()) ? 1 : -1);
             //characters.reverse();
             if(this_chid != undefined) $("#avatar_url_pole").val(characters[this_chid].avatar);
             printCharaters();
@@ -660,7 +652,28 @@ $(document).ready(function(){
         }
         messageText = messageFormating(messageText, characterName);
         if(type !== 'swipe'){
-            $("#chat").append( '<div class="mes" mesid='+count_view_mes+' ch_name="'+characterName+'" is_user="'+mes['is_user']+'"><div class="for_checkbox"></div><input type="checkbox" class="del_checkbox"><div class=avatar><img src="'+avatarImg+'"></div><div class=mes_block><div class=ch_name>'+characterName+'<div title=Edit class=mes_edit><img src=img/scroll.png></div><div class=mes_edit_cancel><img src=img/cancel.png></div><div class=mes_edit_done><img src=img/done.png></div></div><div class=mes_text>'+'</div></div><div class="swipe_left"><img src="img/swipe_left.png"></div><div class="swipe_right"><img src="img/swipe_right.png"></div></div>' );
+            let container = $('<div class="mes" mesid='+count_view_mes+' ch_name="'+characterName+'" is_user="'+mes['is_user']+'"></div>')
+                container.append('<div class="for_checkbox"></div><input type="checkbox" class="del_checkbox">');       // delete checkbox
+                container.append('<div class="avatar"><img src="'+avatarImg+'"></div>');                                // avatar
+
+            let messageBlock = $('<div class="mes_block"></div>');
+                messageBlock.append('<div class="ch_name">'+characterName+'</div>');                                    // character name block
+            container.append(messageBlock);
+
+            // message content
+            messageBlock.append('<div class="mes_text"></div>');
+
+            container.append('<div title="Edit" class="mes_edit"><img src="img/scroll.png"></div>');                // edit button
+            let editMenu = $('<div class="edit_block"></div>');                                                         // edit menu shown when edit button is pressed
+                editMenu.append('<div class="mes_edit_done"><img src="img/done.png"></div>');                           // confirm button
+                editMenu.append('<div class="mes_edit_cancel"><img src="img/cancel.png"></div>');                       // cancel (close menu)
+            container.append(editMenu);
+
+            /* Swipes */
+            container.append('<div class="swipe_left"><img src="img/swipe_left.png"></div>');
+            container.append('<div class="swipe_right"><img src="img/swipe_right.png"></div>');
+
+            $("#chat").append(container);
         }
         
         if(!if_typing_text){
@@ -742,6 +755,7 @@ $(document).ready(function(){
     });
     async function Generate(type) {//encode("dsfs").length
         const gap_holder = 120;
+        var textareaText = '';
         tokens_already_generated = 0;
         if(!free_char_name_mode){
             message_already_generated = name2+': ';
@@ -750,7 +764,7 @@ $(document).ready(function(){
         }
         if(online_status != 'no_connection' && this_chid != undefined){
             if(type === 'regenerate'){
-                var textareaText = "";
+                textareaText = "";
                 if(chat[chat.length-1]['is_user']){//If last message from You
 
                 }else{
@@ -760,8 +774,10 @@ $(document).ready(function(){
                 }
                 
             }else{
-                var textareaText = $("#send_textarea").val();
-                $("#send_textarea").val('');
+                if(type !== 'swipe'){
+                    textareaText = $("#send_textarea").val();
+                    $("#send_textarea").val('');
+                }
             }
             //$("#send_textarea").attr("disabled","disabled");
 
@@ -861,7 +877,7 @@ $(document).ready(function(){
                     Scenario = Scenario.replace(/<BOT>/gi, name2);
                 }
             }
-
+            
 
             if(is_pygmalion){
                 if(charDescription.length > 0){
@@ -894,7 +910,16 @@ $(document).ready(function(){
 
 
             }
+            
 
+            if(main_api === 'openai' && (model_openai === 'gpt-3.5-turbo' || model_openai === 'gpt-3.5-turbo-0301')){
+                let osp_string = openai_system_prompt.replace(/{{user}}/gi, name1) //System prompt for OpenAI
+                                .replace(/{{char}}/gi, name2)
+                                .replace(/<USER>/gi, name1)
+                                .replace(/<BOT>/gi, name2);
+                storyString = osp_string+'\n'+storyString;
+            }
+            
             var count_exm_add = 0;
             var chat2 = [];
             var j = 0;
@@ -1026,7 +1051,9 @@ $(document).ready(function(){
                             //chatString+=postAnchor+"\n";//"[Writing style: very long messages]\n";
                             item =item+ anchorBottom+"\n";
                         }
-                        if(!free_char_name_mode){
+                        
+
+                        if(!free_char_name_mode && !(main_api === 'openai' && (model_openai === 'gpt-3.5-turbo' || model_openai === 'gpt-3.5-turbo-0301'))){
                             if(i >= arrMes.length-1 && $.trim(item).substr(0, (name1+":").length) == name1+":"){//for add name2 when user sent
                                 item =item+name2+":";
                             }
@@ -1101,12 +1128,9 @@ $(document).ready(function(){
                 if(main_api === 'openai' && (model_openai === 'gpt-3.5-turbo' || model_openai === 'gpt-3.5-turbo-0301')){
                     finalPromt = {};
                     finalPromt = [];
-                    let osp_string = openai_system_prompt.replace(/{{user}}/gi, name1)
-                            .replace(/{{char}}/gi, name2)
-                            .replace(/<USER>/gi, name1)
-                            .replace(/<BOT>/gi, name2);
                     
-                    finalPromt[0] = {"role": "system", "content": osp_string+"\n"+storyString+mesExmString};
+                    
+                    finalPromt[0] = {"role": "system", "content": storyString+mesExmString};
                     mesSend.forEach(function(item,i){
                         if(item.indexOf(name1+':') === 0){
                             finalPromt[i+1] = {"role": "user", "content": item};
@@ -1150,7 +1174,7 @@ $(document).ready(function(){
                     }
                 }
                 if(main_api == 'kobold'){
-                    var generate_data = {prompt: finalPromt, gui_settings: true, max_context_length: this_max_context};
+                    var generate_data = {prompt: finalPromt, gui_settings: true, max_context_length: this_max_context, singleline: singleline};
                     if(preset_settings != 'gui'){
 
                         var this_settings = koboldai_settings[koboldai_setting_names[preset_settings]];
@@ -1169,6 +1193,7 @@ $(document).ready(function(){
                                         top_k: parseInt(top_k),
                                         top_p: parseFloat(top_p),
                                         typical: parseFloat(typical),
+                                        singleline: singleline,
                                         s1:this_settings.sampler_order[0],
                                         s2:this_settings.sampler_order[1],
                                         s3:this_settings.sampler_order[2],
@@ -1471,7 +1496,7 @@ $(document).ready(function(){
         select_selected_character(this_chid);
     }
     $("#send_textarea").keypress(function (e) {
-        if(e.which === 13 && !e.shiftKey && is_send_press == false && !isMobile) {
+        if(e.which === 13 && !e.shiftKey && is_send_press == false) {
             hideSwipeButtons();
             is_send_press = true;
             e.preventDefault();
@@ -1673,7 +1698,7 @@ $(document).ready(function(){
         if(characters[chid].avatar != 'none'){
                 this_avatar = "characters/"+characters[chid].avatar;
         }
-        $("#avatar_load_preview").attr('src',this_avatar);
+        $("#avatar_load_preview").attr('src',this_avatar+"?v="+Date.now());
         $("#name_div").css("display", "none");
 
         $("#form_create").attr("actiontype", "editcharacter");
@@ -1750,7 +1775,7 @@ $(document).ready(function(){
         saveSettings();
 
     });
-    $('#bg_menu_button').click(function(event) {  
+    $('#logo_block').click(function(event) {  
         if(!bg_menu_toggle){
             $('#chara_cloud').transition({  
                 marginLeft: "170px",
@@ -2608,9 +2633,10 @@ $(document).ready(function(){
             $('#novel_api').css("display", "none");
             $('#openai_api').css("display","none");
             
-            $('#master_settings_koboldai_block').css("display", "list-item");
+            $('#master_settings_koboldai_block').css("display", "grid");
             $('#master_settings_novelai_block').css("display", "none");
             $('#master_settings_openai_block').css("display", "none");
+            $('#singleline_toggle').css("display", "grid");
 
             main_api = 'kobold';
         }
@@ -2619,8 +2645,9 @@ $(document).ready(function(){
             $('#novel_api').css("display", "block");
             $('#openai_api').css("display","none");
             $('#master_settings_koboldai_block').css("display", "none");
-            $('#master_settings_novelai_block').css("display", "list-item");
+            $('#master_settings_novelai_block').css("display", "grid");
             $('#master_settings_openai_block').css("display", "none");
+            $('#singleline_toggle').css("display", "none");
 
             main_api = 'novel';
         }
@@ -2630,7 +2657,8 @@ $(document).ready(function(){
             $('#openai_api').css("display","block");
             $('#master_settings_koboldai_block').css("display", "none");
             $('#master_settings_novelai_block').css("display", "none");
-            $('#master_settings_openai_block').css("display", "list-item");
+            $('#master_settings_openai_block').css("display", "grid");
+            $('#singleline_toggle').css("display", "none");
             main_api = 'openai';
         }
     }
@@ -2759,6 +2787,18 @@ $(document).ready(function(){
     });
     $('#multigen').change(function() {
         multigen = !!$('#multigen').prop('checked');
+        saveSettings();
+    });
+    $('#singleline').change(function() {
+        singleline = !!$('#singleline').prop('checked');
+        saveSettings();
+    });
+    $('#autoconnect').change(function() {
+        settings.auto_connect = !!$('#autoconnect').prop('checked');
+        saveSettings();
+    });
+    $('#characloud').change(function() {
+        settings.characloud = !!$('#characloud').prop('checked');
         saveSettings();
     });
     $('#swipes').change(function() {
@@ -3185,14 +3225,20 @@ $(document).ready(function(){
                     character_anchor = !!settings.character_anchor;//if(settings.character_anchor !== undefined) character_anchor = !!settings.character_anchor;
                     lock_context_size = !!settings.lock_context_size;
                     multigen = !!settings.multigen;
+                    singleline = !!settings.singleline;
                     swipes = !!settings.swipes;
                     keep_dialog_examples = !!settings.keep_dialog_examples;
                     free_char_name_mode = !!settings.free_char_name_mode;
+                    settings.auto_connect = settings.auto_connect === false ? false : true;
+                    settings.characloud = settings.characloud === false ? false : true;
                     
                     $('#style_anchor').prop('checked', style_anchor);
                     $('#character_anchor').prop('checked', character_anchor);
                     $('#lock_context_size').prop('checked', lock_context_size);
                     $('#multigen').prop('checked', multigen);
+                    $('#singleline').prop('checked', singleline);
+                    $('#autoconnect').prop('checked', settings.auto_connect);
+                    $('#characloud').prop('checked', settings.characloud);
                     $('#swipes').prop('checked', swipes);
                     $('#keep_dialog_examples').prop('checked', keep_dialog_examples);
                     $('#free_char_name_mode').prop('checked', free_char_name_mode);
@@ -3279,8 +3325,16 @@ $(document).ready(function(){
 
                     api_server = settings.api_server;
                     $('#api_url_text').val(api_server);
-                    
-                    charaCloudInit();
+
+                    if(api_server && settings.auto_connect && !is_colab) {
+                        setTimeout(function() {
+                            $('#api_button').click();
+                        }, 2000);
+                    }
+
+                    if(settings.characloud) {
+                        charaCloudInit();
+                    }
                     
                 }
                 if(!is_checked_colab) isColab();
@@ -3323,6 +3377,9 @@ $(document).ready(function(){
                     character_anchor: character_anchor,
                     lock_context_size: lock_context_size,
                     multigen: multigen,
+                    singleline: singleline,
+                    auto_connect: settings.auto_connect || false,
+                    characloud: settings.characloud === false ? false : true,
                     swipes: swipes,
                     keep_dialog_examples: keep_dialog_examples,
                     free_char_name_mode: free_char_name_mode,
@@ -3408,72 +3465,86 @@ $(document).ready(function(){
     }
     //********************
     //***Message Editor***
-    $(document).on('click', '.mes_edit', function(){
-        if(this_chid !== undefined){
-            let run_edit = true;
-            var edit_mes_id = $(this).parent().parent().parent().attr('mesid');
+    function messageRoot(anyChild) {
+        while(anyChild && anyChild.length && anyChild.attr && (anyChild.attr("mesid") === undefined || anyChild.attr("mesid") === null) && anyChild.parent) {
+            anyChild = anyChild.parent();
+        }
+        if(anyChild && anyChild.attr && anyChild.attr("mesid") !== undefined && anyChild.attr("mesid") !== null) {
+            return anyChild;
+        }
+        return null;
+    }
+    function toggleEdit(messageRoot, toState = false) {
+        if(!messageRoot) { return; }
+        messageRoot.find('.mes_edit').css("display", toState ? "none": "block");
+        const editBlock = messageRoot.find('.edit_block');
+        editBlock.css("display", toState ? "block" : "none");
+        if(toState) {
+            editBlock.css("opacity", 0);
+            editBlock.transition({
+                opacity: 1.0,
+                duration: 600,
+                easing: "",
+                complete: function() {  }
+            });
+        }
+    }
 
-            if(edit_mes_id == count_view_mes-1){ //if the generating swipe (...)
-                if(chat[edit_mes_id]['swipe_id'] !== undefined){
-                    if(chat[edit_mes_id]['swipes'].length === chat[edit_mes_id]['swipe_id']){
-                        run_edit = false;
-                    }
-                }
-                if(run_edit){
-                    hideSwipeButtons();
+    $(document).on('click', '.mes_edit', function(){
+        if(this_chid == undefined){
+            return;
+        }
+        let run_edit = true;
+        const root = messageRoot($(this));
+        if(!root) { return; }
+        const edit_mes_id = root ? parseInt(root.attr("mesid")) : NaN;
+        if(isNaN(edit_mes_id)) { return; }
+        if(this_edit_mes_id !== undefined) { return; }
+
+        if(edit_mes_id == count_view_mes-1){ //if the generating swipe (...)
+            if(chat[edit_mes_id]['swipe_id'] !== undefined){
+                if(chat[edit_mes_id]['swipes'].length === chat[edit_mes_id]['swipe_id']){
+                    run_edit = false;
                 }
             }
             if(run_edit){
-                let chatScrollPosition = $("#chat").scrollTop();
-                if(this_edit_mes_id !== undefined){
-                    let mes_edited = $('#chat').children().filter('[mesid="'+this_edit_mes_id+'"]').children('.mes_block').children('.ch_name').children('.mes_edit_done');
-                    messageEditDone(mes_edited);
-                }
-                $(this).parent().parent().children('.mes_text').empty();
-                $(this).css('display','none');
-                $(this).parent().children('.mes_edit_done').css('display','inline-block');
-                $(this).parent().children('.mes_edit_done').css('opacity',0.0);
-                $(this).parent().children('.mes_edit_cancel').css('display','inline-block');
-                $(this).parent().children('.mes_edit_cancel').css('opacity',0.0);
-                $(this).parent().children('.mes_edit_done').transition({  
-                        opacity: 1.0,
-                        duration: 600,
-                        easing: "",
-                        complete: function() {  }
-                });
-                $(this).parent().children('.mes_edit_cancel').transition({  
-                        opacity: 1.0,
-                        duration: 600,
-                        easing: "",
-                        complete: function() {  }
-                });
+                hideSwipeButtons();
+            }
+        }
+        if(run_edit){
+            let chatScrollPosition = $("#chat").scrollTop();
+            if(this_edit_mes_id !== undefined){
+                let mes_edited = $('#chat').children().filter('[mesid="'+this_edit_mes_id+'"]').children('.mes_block').children('.ch_name').children('.mes_edit_done');
+                messageEditDone(mes_edited);
+            }
+            root.find('.mes_text').empty();
+            toggleEdit(root, true);
+            this_edit_mes_id = edit_mes_id;
 
-                this_edit_mes_id = edit_mes_id;
-
-                var text = chat[edit_mes_id]['mes'];
-                if(chat[edit_mes_id]['is_user']){
-                    this_edit_mes_chname = name1;
-                }else{
-                    this_edit_mes_chname = name2;
-                }
-                text = text.trim();
-                $(this).parent().parent().children('.mes_text').append('<textarea class=edit_textarea>'+text+'</textarea>');
-                let edit_textarea = $(this).parent().parent().children('.mes_text').children('.edit_textarea');
-                edit_textarea.css('opacity',0.0);
-                edit_textarea.transition({  
-                        opacity: 1.0,
-                        duration: 0,
-                        easing: "",
-                        complete: function() {  }
-                });
-                edit_textarea.height(0);
-                edit_textarea.height(edit_textarea[0].scrollHeight);
-                edit_textarea.focus();
-                edit_textarea[0].setSelectionRange(edit_textarea.val().length, edit_textarea.val().length);
-                if(this_edit_mes_id == count_view_mes-1 || true){
-                    console.log(1);
-                    $("#chat").scrollTop(chatScrollPosition);
-                }
+            var text = chat[edit_mes_id]['mes'];
+            if(chat[edit_mes_id]['is_user']){
+                this_edit_mes_chname = name1;
+            }else{
+                this_edit_mes_chname = name2;
+            }
+            text = text.trim();
+            const mesText = root.find('.mes_text');
+            let edit_textarea = $('<textarea class=edit_textarea>'+text+'</textarea>');
+            mesText.append(edit_textarea);
+            edit_textarea.css('opacity',0.0);
+            edit_textarea.transition({
+                    opacity: 1.0,
+                    duration: 0,
+                    easing: "",
+                    complete: function() {  }
+            });
+            edit_textarea.height(0);
+            edit_textarea.height(edit_textarea[0].scrollHeight);
+            edit_textarea.focus();
+            edit_textarea[0].setSelectionRange(edit_textarea.val().length, edit_textarea.val().length);
+            if(this_edit_mes_id == count_view_mes-1 || true){
+                //console.log(1);
+                $("#chat").scrollTop(chatScrollPosition);
             }
         }
     });
@@ -3482,11 +3553,11 @@ $(document).ready(function(){
         //var text = $(this).parent().parent().children('.mes_text').children('.edit_textarea').val();
         var text = chat[this_edit_mes_id]['mes'];
 
-        $(this).parent().parent().children('.mes_text').empty();
-        $(this).css('display','none');
-        $(this).parent().children('.mes_edit_done').css('display','none');
-        $(this).parent().children('.mes_edit').css('display','inline-block');
-        $(this).parent().parent().children('.mes_text').append(messageFormating(text,this_edit_mes_chname));
+        const root = messageRoot($(this));
+        if(!root) { return; }
+        toggleEdit(root, false);
+        root.find('.mes_text').empty();
+        root.find('.mes_text').append(messageFormating(text,this_edit_mes_chname));
         this_edit_mes_id = undefined;
     });
     $(document).on('click', '.mes_edit_done', function(){
@@ -3495,23 +3566,38 @@ $(document).ready(function(){
     });
     function messageEditDone(div){
         showSwipeButtons();
-        var text = div.parent().parent().children('.mes_text').children('.edit_textarea').val();
-        //var text = chat[this_edit_mes_id];
+        const root = messageRoot(div);
+        if(!root) { return; }
+        var text = root.find('.mes_text').children('.edit_textarea').val();
         text = text.trim();
         chat[this_edit_mes_id]['mes'] = text;
         if(chat[this_edit_mes_id]['swipe_id'] !== undefined){
             chat[this_edit_mes_id]['swipes'][chat[this_edit_mes_id]['swipe_id']] = text;
         }
-        div.parent().parent().children('.mes_text').empty();
-        div.css('display','none');
-        div.parent().children('.mes_edit_cancel').css('display','none');
-        div.parent().children('.mes_edit').css('display','inline-block');
-        div.parent().parent().children('.mes_text').append(messageFormating(text,this_edit_mes_chname));
+        root.find('.mes_text').empty();
+        toggleEdit(root, false);
+        root.find('.mes_text').append(messageFormating(text,this_edit_mes_chname));
         this_edit_mes_id = undefined;
         saveChat();
     }
     //********************
     //***Swipes***
+    $(document).keydown(function(e) {
+        if (($(document.activeElement).is('#send_textarea') && $('#send_textarea').val().length === 0) || !$('textarea:focus, input[type="text"]:focus').length) {
+            if (e.keyCode == 37) {
+                // Left arrow key pressed
+                if(JSON.parse($('#chat').children('.mes').last().attr('is_user')) === false && $('#chat').children('.mes').last().children('.swipe_left').css('display') !== 'none'){
+                    $('#chat').children('.mes').last().children('.swipe_left').click();
+                }
+            } else if (e.keyCode == 39) {
+                // Right arrow key pressed
+                if(JSON.parse($('#chat').children('.mes').last().attr('is_user')) === false && $('#chat').children('.mes').last().children('.swipe_right').css('display') !== 'none'){
+                    $('#chat').children('.mes').last().children('.swipe_right').click();
+
+                }
+            }
+        }
+    });
     $(document).on('click', '.swipe_right', function(){
         const swipe_duration = 120;
         const swipe_range = '700px';
@@ -4184,10 +4270,15 @@ $(document).ready(function(){
                         if(this_discr.length == 0){
                             this_discr = "Hello, I'm "+item.name;
                         }
-                        if(this_discr.length > 2000){
-                            this_discr = this_discr.substr(0,2000);
+                        if(this_discr.length > 120){
+                            this_discr = this_discr.substr(0,120);
                         }
                         $('#characloud_character_block'+char_i).children('.characloud_character_block_card').children( '.characloud_character_block_description' ).text($.trim(this_discr));
+                        while(parseInt($('#characloud_character_block'+char_i).children('.characloud_character_block_card').children( '.characloud_character_block_description' ).css('height').replace('px', '')) > 40 && j < 100){
+                            this_discr = this_discr.slice(0,this_discr.length-5);
+                            $('#characloud_character_block'+char_i).children('.characloud_character_block_card').children( '.characloud_character_block_description' ).text($.trim(this_discr)+'...');
+                            j++;
+                        }
                         characloud_characters[char_i] = item;
                         char_i++;
                     });
@@ -4451,4 +4542,31 @@ $(document).ready(function(){
 
 });
 
+document.getElementsByName("search_bar")[0].addEventListener('keyup', search_chars);
+function search_chars(){
+    const character_list = document.querySelector('#rm_print_charaters_block').querySelectorAll('div.character_select');
+    for (let i = 0; i < character_list.length; i++) {
+        character_list[i].style.display = "";
+        if (character_list[i].textContent.toLowerCase().indexOf(this.value)<0){
+            character_list[i].style.display = "none";
+        }
+    }
+}
+/*
+function auto_start(){
+    //console.log(main_api.value)
 
+    if (main_api.value == "openai"){
+        document.getElementById("api_button_openai").click()
+    }
+    else if (main_api.value == "novel"){
+        document.getElementById("api_button_novel").click()
+    }
+    else if (main_api.value == "kobold"){
+        document.getElementById("api_button").click()
+    }
+}
+$(document).ready(function() {
+    setTimeout(auto_start, 500)
+})
+ * */
