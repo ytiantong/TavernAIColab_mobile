@@ -21,7 +21,7 @@ body {
     background-repeat: no-repeat;
     background-attachment: fixed;
     background-size: cover;
-    backdrop-filter: blur(2px);
+    /*backdrop-filter: blur(2px);*/
     scrollbar-width: thin;
     scrollbar-color: gray #191b31;
     color: rgb(229, 224, 216);
@@ -129,7 +129,7 @@ code {
     background-repeat: no-repeat;
     background-attachment: fixed;
     background-size: cover;
-    filter: blur(2px);
+    /*filter: blur(2px);*/
     position: absolute;
     width: 100%;
     height: 100%;
@@ -140,10 +140,10 @@ code {
     background-size: auto 100%;
     background-repeat: no-repeat;
     background-attachment: fixed;
-    filter: blur(2px);
+    /*filter: blur(2px);*/
     background-size: cover;
-    -webkit-backdrop-filter: blur(2px);
-    backdrop-filter: blur(2px);
+    /*-webkit-backdrop-filter: blur(2px);*/
+    /*backdrop-filter: blur(2px);*/
     opacity: 0.0;
     position: absolute;
     width: 100%;
@@ -407,6 +407,20 @@ hr {
     margin-left: 5px;
     margin-top: 6px;
     font-weight:bolder;
+}
+.name_select {
+    display: none;
+    grid-area: 1 / 1 / 2 / 4;
+    margin: 0px;
+    margin-left: 35px;
+    padding: 0px;
+    width: min-content;
+    height: 1.25em;
+    font-size: 100%;
+    color: #ffffff9d;
+    box-shadow: 0 0 2px rgba(200,200,200,0.0);
+    background-color: #13152c55;
+    border-bottom: 1px dashed rgba(255, 255, 255, 0.12);
 }
 .mes_text {
     /* background: olive; */
@@ -1450,6 +1464,10 @@ input[type="range"]::-ms-thumb {
     width: 23px;
     height: 23px;
 }
+.edit_block div.disabled {
+    pointer-events: none;
+    opacity: 0.25;
+}
 .edit_textarea {
     word-wrap: break-word;
     font-weight: lighter;
@@ -1848,17 +1866,7 @@ label.checkbox :checked + span:after {
     }
 }
 
-@media screen and (max-width: 450px) {
-    html,
-    body {
-      margin: 0;
-      overflow-x: hidden;
-    }
-    .nav {
-      width: 100%;
-      box-shadow: none
-    }
-}
+
 
 
 
@@ -1872,7 +1880,7 @@ label.checkbox :checked + span:after {
     background-repeat: no-repeat;
     background-attachment: fixed;
     background-size: cover;
-    filter: blur(2px);
+    /*filter: blur(2px);*/
     position: absolute;
     width: 100%;
     height: 100%;
@@ -2122,8 +2130,8 @@ label.checkbox :checked + span:after {
 #characloud_status_block_content_logo {
     margin-left: 15px;
     margin-top: 0px;
-    -moz-filter: blur(0.2px); /* Firefox */
-    -o-filter: blur(0.2px); /* Opera */
+    /*-moz-filter: blur(0.2px);*/ /* Firefox */
+    /*-o-filter: blur(0.2px);*/ /* Opera */
 
     /*filter: drop-shadow(0px 0px 2px #656565ff);*/
     display: grid;
@@ -2161,7 +2169,7 @@ label.checkbox :checked + span:after {
 
 
 #characloud_status_block_content_logo_line_container {
-    -webkit-filter: blur(0.3px); /* Safari, Chrome */
+    /*-webkit-filter: blur(0.3px);*/ /* Safari, Chrome */
     margin-left: 2px;
     position: relative;
     width: 45px;
@@ -2188,7 +2196,7 @@ label.checkbox :checked + span:after {
 }
 
 #characloud_status_block_content_logo_counter {
-    -webkit-filter: blur(0.3px); /* Safari, Chrome */
+    /*-webkit-filter: blur(0.3px);*/ /* Safari, Chrome */
     display: inline-block;
     color: rgba(255,180,180,0.4);
     font-weight: 900;
@@ -2226,4 +2234,67 @@ label.checkbox :checked + span:after {
 }
 #search_bar::placeholder  {
     color: white;
+}
+
+@media screen and (max-width: 450px) {
+    html,
+    body {
+      margin: 0;
+      overflow-x: hidden;
+    }
+    .nav {
+      width: 100%;
+      min-width: auto;
+      box-shadow: none
+    }
+    #bg_menu {
+        position: relative;
+    }
+    #chara_cloud{
+        width: 90%;
+        height: 100vh;
+        overflow: hidden;
+        overflow-y: scroll;
+        margin-left: 5%;/*170px;*/  
+    }
+    .characloud_character_block_card .avatar {
+        padding: 0px;
+        border-radius: 5px;
+        width: 150px;
+        height: 150px;
+        position: relative; /* make the avatar container position:relative */
+        overflow: hidden; /* hide the overflow of the box-shadow */
+    }
+    .characloud_characters_row {
+        position: relative;
+        overflow-x: scroll;
+        height: 240px;/*height: 345px;*/
+        margin-bottom: 35px;
+        background-color: #ffffff22;
+        padding: 8px;
+        padding-top: 30px;
+        border-radius: 10px;
+    }
+    .characloud_swipe_rigth, .characloud_swipe_left{
+        display: none;
+    }
+    .characloud_character_block_card{
+        height: 200px;
+        overflow-y: scroll;
+    }
+    .characloud_character_block_name{
+        bottom: 30px;
+    }
+    .characloud_character_block_description {
+        top: 75%;
+        font-size: 13px;
+        word-wrap: break-word;
+    }
+    #master_settings_toggle_block{
+        display: list-item;
+    }
+    #api_url_text, #api_key_novel, #api_key_openai {
+        font-size: 10pt;
+        width: 80%;
+    }
 }

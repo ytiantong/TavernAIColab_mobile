@@ -29,7 +29,11 @@ const config = require(path.join(process.cwd(), './config.conf'));
 const server_port = config.port;
 const whitelist = config.whitelist;
 const whitelistMode = config.whitelistMode;
-const listenIp = config.listenIp || '127.0.0.1';
+let listenIp = config.listenIp || '127.0.0.1';
+
+if(!whitelistMode || whitelist.length > 1){
+    listenIp = '0.0.0.0';
+}
 const autorun = config.autorun;
 const characterFormat = config.characterFormat;
 const charaCloudMode = config.charaCloudMode;
@@ -419,7 +423,9 @@ function checkServer(){
 
 //***************** Main functions
 function checkCharaProp(prop) {
-  return String(prop) || '';
+  return (String(prop) || '')
+      .replace(/[\u2018\u2019‘’]/g, "'")
+      .replace(/[\u201C\u201D“”]/g, '"');
 }
 function charaFormatData(data){
     let name;
@@ -493,14 +499,6 @@ app.post("/editcharacter", urlencodedParser, function(request, response){
         char.add_date = request.body.create_date;
     }
     char.edit_date = Date.now();
-
-    for(let key in char) {
-        if(typeof char[key] === "string") {
-            char[key] = char[key]
-                .replace(/[\u2018\u2019]/g, "'")
-                .replace(/[\u201C\u201D]/g, '"');
-        }
-    }
 
     char = JSON.stringify(char);
     let target_img = (request.body.avatar_url).replace(`.${characterFormat}`, '');
@@ -773,16 +771,19 @@ app.post("/getcharacters", jsonParser, async function(request, response) {
       let jsonObject;
 
       try {
+        
         jsonObject = json5.parse(imgData);
         jsonObject.avatar = item;
         characters[i] = jsonObject;
         i++;
       } catch (error) {
         if (error instanceof SyntaxError) {
-          console.log(`String [${i}] is not valid JSON!`);
+          console.error("Character info from index " +i+ " is not valid JSON!", error);
         } else {
-          console.log(`An unexpected error occurred: ${error}`);
+          console.error("An unexpected error loading character index " +i+ " occurred.", error);
         }
+        console.error("Pre-parsed character data:");
+        console.error(imgData);
       }
     }
 
@@ -1196,28 +1197,35 @@ app.post("/generate_openai", jsonParser, function(request, response_generate_ope
     };
     
     client.post(api_openai+request_path,args, function (data, response) {
-        if(request.body.model === 'gpt-3.5-turbo' || request.body.model === 'gpt-3.5-turbo-0301'){
-            console.log(data);
-            if(data.choices[0].message !== undefined){
-                console.log(data.choices[0].message);
+        try {
+            if(request.body.model === 'gpt-3.5-turbo' || request.body.model === 'gpt-3.5-turbo-0301'){
+                console.log(data);
+                if(data.choices[0].message !== undefined){
+                    console.log(data.choices[0].message);
+                }
+
+
+            }else{
+                console.log(data);
             }
-        }else{
-            console.log(data);
-        }
-        console.log(response.statusCode);
-        if(response.statusCode <= 299){
-            response_generate_openai.send(data);
-        }
-        if(response.statusCode == 401){
-            console.log('Invalid Authentication');
-            response_generate_openai.send({error: true});
-        }
-        if(response.statusCode == 429){
-            console.log('Rate limit reached for requests');
-            response_generate_openai.send({error: true});
-        }
-        if(response.statusCode == 500){
-            console.log('The server had an error while processing your request');
+            console.log(response.statusCode);
+            if(response.statusCode <= 299){
+                response_generate_openai.send(data);
+            }
+            if(response.statusCode == 401){
+                console.log('Invalid Authentication');
+                response_generate_openai.send({error: true});
+            }
+            if(response.statusCode == 429){
+                console.log('Rate limit reached for requests');
+                response_generate_openai.send({error: true});
+            }
+            if(response.statusCode == 500){
+                console.log('The server had an error while processing your request');
+                response_generate_openai.send({error: true});
+            }
+        }catch (error) {
+            console.log("An error occurred: " + error);
             response_generate_openai.send({error: true});
         }
     }).on('error', function (err) {

@@ -29,15 +29,25 @@ $(document).ready(function(){
     const config = { childList: true, subtree: true, attributes: true, attributeFilter: ['src'] };
     observer.observe(document.body, config);
     */
+
+    var isMobile = false; //initiate as false
+    // device detection
+    if (/Mobi|Android/i.test(navigator.userAgent)) {
+        isMobile = true;
+    }
+    //if(/(android|bb\d+|meego).+mobile|avantgo|bada\/|blackberry|blazer|compal|elaine|fennec|hiptop|iemobile|ip(hone|od)|ipad|iris|kindle|Android|Silk|lge |maemo|midp|mmp|netfront|opera m(ob|in)i|palm( os)?|phone|p(ixi|re)\/|plucker|pocket|psp|series(4|6)0|symbian|treo|up\.(browser|link)|vodafone|wap|windows (ce|phone)|xda|xiino/i.test(navigator.userAgent) 
+    //    || /1207|6310|6590|3gso|4thp|50[1-6]i|770s|802s|a wa|abac|ac(er|oo|s\-)|ai(ko|rn)|al(av|ca|co)|amoi|an(ex|ny|yw)|aptu|ar(ch|go)|as(te|us)|attw|au(di|\-m|r |s )|avan|be(ck|ll|nq)|bi(lb|rd)|bl(ac|az)|br(e|v)w|bumb|bw\-(n|u)|c55\/|capi|ccwa|cdm\-|cell|chtm|cldc|cmd\-|co(mp|nd)|craw|da(it|ll|ng)|dbte|dc\-s|devi|dica|dmob|do(c|p)o|ds(12|\-d)|el(49|ai)|em(l2|ul)|er(ic|k0)|esl8|ez([4-7]0|os|wa|ze)|fetc|fly(\-|_)|g1 u|g560|gene|gf\-5|g\-mo|go(\.w|od)|gr(ad|un)|haie|hcit|hd\-(m|p|t)|hei\-|hi(pt|ta)|hp( i|ip)|hs\-c|ht(c(\-| |_|a|g|p|s|t)|tp)|hu(aw|tc)|i\-(20|go|ma)|i230|iac( |\-|\/)|ibro|idea|ig01|ikom|im1k|inno|ipaq|iris|ja(t|v)a|jbro|jemu|jigs|kddi|keji|kgt( |\/)|klon|kpt |kwc\-|kyo(c|k)|le(no|xi)|lg( g|\/(k|l|u)|50|54|\-[a-w])|libw|lynx|m1\-w|m3ga|m50\/|ma(te|ui|xo)|mc(01|21|ca)|m\-cr|me(rc|ri)|mi(o8|oa|ts)|mmef|mo(01|02|bi|de|do|t(\-| |o|v)|zz)|mt(50|p1|v )|mwbp|mywa|n10[0-2]|n20[2-3]|n30(0|2)|n50(0|2|5)|n7(0(0|1)|10)|ne((c|m)\-|on|tf|wf|wg|wt)|nok(6|i)|nzph|o2im|op(ti|wv)|oran|owg1|p800|pan(a|d|t)|pdxg|pg(13|\-([1-8]|c))|phil|pire|pl(ay|uc)|pn\-2|po(ck|rt|se)|prox|psio|pt\-g|qa\-a|qc(07|12|21|32|60|\-[2-7]|i\-)|qtek|r380|r600|raks|rim9|ro(ve|zo)|s55\/|sa(ge|ma|mm|ms|ny|va)|sc(01|h\-|oo|p\-)|sdk\/|se(c(\-|0|1)|47|mc|nd|ri)|sgh\-|shar|sie(\-|m)|sk\-0|sl(45|id)|sm(al|ar|b3|it|t5)|so(ft|ny)|sp(01|h\-|v\-|v )|sy(01|mb)|t2(18|50)|t6(00|10|18)|ta(gt|lk)|tcl\-|tdg\-|tel(i|m)|tim\-|t\-mo|to(pl|sh)|ts(70|m\-|m3|m5)|tx\-9|up(\.b|g1|si)|utst|v400|v750|veri|vi(rg|te)|vk(40|5[0-3]|\-v)|vm40|voda|vulc|vx(52|53|60|61|70|80|81|83|85|98)|w3c(\-| )|webc|whit|wi(g |nc|nw)|wmlb|wonu|x700|yas\-|your|zeto|zte\-/i.test(navigator.userAgent.substr(0,4))) { 
+    //    isMobile = true;
+    //}
+
     //CharaCloud
     var charaCloud = charaCloudClient.getInstance();
     var characloud_characters = [];
     var characloud_characters_rows;
     var characloud_found_characters = [];
-    var charaCloudServer = 'http://127.0.0.1:3000';
-    var charaCloudMode = false;
+    var charaCloudServer = 'http://127.0.0.1:80';
     ///////////
-    const VERSION = '1.3.0';
+    const VERSION = '1.3.1';
     var converter = new showdown.Converter();
     var bg_menu_toggle = false;
     var default_user_name = "You";
@@ -111,6 +121,7 @@ $(document).ready(function(){
     var this_edit_mes_text = '';
     var this_edit_mes_chname = '';
     var this_edit_mes_id;
+    var this_edit_target_id = undefined;
 
     const delay = ms => new Promise(res => setTimeout(res, ms));
     //settings
@@ -454,9 +465,9 @@ $(document).ready(function(){
         const response = await fetch("/getcharacters", {
             method: "POST",
             headers: {
-                                        "Content-Type": "application/json",
-                                        "X-CSRF-Token": token
-                                },
+                "Content-Type": "application/json",
+                "X-CSRF-Token": token
+                },
             body: JSON.stringify({
                         "": ""
                     })
@@ -473,7 +484,7 @@ $(document).ready(function(){
 
                 characters[i] = [];
                 characters[i] = getData[i];
-                
+                characters[i]['name'] = DOMPurify.sanitize(characters[i]['name']);
                 if(characters[i].add_date === undefined){
                     characters[i].add_date = characters[i].create_date;
                 }
@@ -611,39 +622,28 @@ $(document).ready(function(){
         }
         return mes;
     }
-    function addOneMessage(mes, type='normal'){
-        //var message = mes['mes'];
-        //message = mes['mes'].replace(/^\s+/g, '');
-        //console.log(message.indexOf(name1+":"));
+    function getMessageAvatar(mes) {
+        var avatarImg = "User Avatars/"+user_avatar;
+        if(!mes.is_user){
+            if(this_chid === undefined) {
+                avatarImg = "img/chloe.png";
+            } else {
+                mes.chid = mes.chid || parseInt(this_chid);
+                avatarImg = characters[mes.chid].avatar == 'none' ? "img/fluffy.png" : "characters/"+characters[this_chid].avatar + "#t=" + Date.now();
+            }
+        } else {
+            delete mes.chid;
+        }
+        return avatarImg;
+    }
+    function addOneMessage(mes, type='normal') {
         var messageText = mes['mes'];
         var characterName = name1;
-        var avatarImg = "User Avatars/"+user_avatar;
         generatedPromtCache = '';
-        //thisText = thisText.split("\n").join("<br>");
-        var avatarImg = "User Avatars/"+user_avatar;
-        if(!mes['is_user']){
-            if(this_chid == undefined){
-                avatarImg = "img/chloe.png";
-            }else{
-                if(characters[this_chid].avatar != 'none'){
-                    avatarImg = "characters/"+characters[this_chid].avatar;
-                    if(is_mes_reload_avatar !== false){
-                        avatarImg+="#"+is_mes_reload_avatar;
-                        //console.log(avatarImg);
-                    }
-                }else{
-                    avatarImg = "img/fluffy.png";
-                }
-            }
-            characterName = name2;
+        var avatarImg = getMessageAvatar(mes);
+        if(!mes.is_user){
+            characterName = characters[mes.chid] ? characters[mes.chid].name : "Chloe";
         }
-
-        //Formating
-        //messageText = messageText.replace(/\*\*(.+?)\*\*/g, '<b>$1</b>').replace(/\*(.+?)\*/g, '<i>$1</i>').replace(/\n/g, '<br/>');
-        //if(characterName != name1){
-            //messageText = messageText.replaceAll(name2+":", "");
-        //}
-        //console.log(messageText);
         if(count_view_mes == 0){
             messageText = messageText.replace(/{{user}}/gi, name1);
             messageText = messageText.replace(/{{char}}/gi, name2);
@@ -651,13 +651,15 @@ $(document).ready(function(){
             messageText = messageText.replace(/<BOT>/gi, name2);
         }
         messageText = messageFormating(messageText, characterName);
+        let container = null;
         if(type !== 'swipe'){
-            let container = $('<div class="mes" mesid='+count_view_mes+' ch_name="'+characterName+'" is_user="'+mes['is_user']+'"></div>')
+                container = $('<div class="mes" mesid='+count_view_mes+' ch_name="'+characterName+'" is_user="'+mes['is_user']+'"></div>')
                 container.append('<div class="for_checkbox"></div><input type="checkbox" class="del_checkbox">');       // delete checkbox
-                container.append('<div class="avatar"><img src="'+avatarImg+'"></div>');                                // avatar
+                container.append('<div class="avatar"><img class="avt_img" src="'+avatarImg+'"></div>');                                // avatar
 
             let messageBlock = $('<div class="mes_block"></div>');
                 messageBlock.append('<div class="ch_name">'+characterName+'</div>');                                    // character name block
+                messageBlock.append('<select class="name_select"></select>');                                    // character name selector for editing
             container.append(messageBlock);
 
             // message content
@@ -666,6 +668,10 @@ $(document).ready(function(){
             container.append('<div title="Edit" class="mes_edit"><img src="img/scroll.png"></div>');                // edit button
             let editMenu = $('<div class="edit_block"></div>');                                                         // edit menu shown when edit button is pressed
                 editMenu.append('<div class="mes_edit_done"><img src="img/done.png"></div>');                           // confirm button
+                editMenu.append('<div class="mes_edit_clone" title="Create copy"><img src=img/clone.png></div>');
+                editMenu.append('<div class="mes_edit_delete" title="Delete"><img src=img/del_mes.png></div>');
+                editMenu.append('<div class="mes_up" title="Move up"><img src=img/arrow_up.png></div>');
+                editMenu.append('<div class="mes_down"><img src="img/arrow_down.png" title="Move down"></div>');
                 editMenu.append('<div class="mes_edit_cancel"><img src="img/cancel.png"></div>');                       // cancel (close menu)
             container.append(editMenu);
 
@@ -677,10 +683,7 @@ $(document).ready(function(){
         }
         
         if(!if_typing_text){
-            
-
             if(type === 'swipe'){
-                
                 $("#chat").children().filter('[mesid="'+(count_view_mes-1)+'"]').children('.mes_block').children('.mes_text').html('');
                 $("#chat").children().filter('[mesid="'+(count_view_mes-1)+'"]').children('.mes_block').children('.mes_text').append(messageText);
                 if(mes['swipe_id'] !== 0 && swipes){
@@ -688,7 +691,6 @@ $(document).ready(function(){
                     $("#chat").children().filter('[mesid="'+(count_view_mes-1)+'"]').children('.swipe_left').css('display', 'block');
                 }
             }else{
-                
                 $("#chat").children().filter('[mesid="'+count_view_mes+'"]').children('.mes_block').children('.mes_text').append(messageText);
                 
                 hideSwipeButtons();
@@ -730,6 +732,8 @@ $(document).ready(function(){
         $('#chat .mes').last().addClass('last_mes');
         $('#chat .mes').eq(-2).removeClass('last_mes');
         $textchat.scrollTop($textchat[0].scrollHeight);
+
+        return container;
     }
     function typeWriter(target, text, speed, i) {
         if (i < text.length) {
@@ -754,7 +758,8 @@ $(document).ready(function(){
         }
     });
     async function Generate(type) {//encode("dsfs").length
-        const gap_holder = 120;
+        let gap_holder = 120;
+        if(main_api === 'openai' && (model_openai === 'gpt-3.5-turbo' || model_openai === 'gpt-3.5-turbo-0301')) gap_holder = parseInt(amount_gen_openai);
         var textareaText = '';
         tokens_already_generated = 0;
         if(!free_char_name_mode){
@@ -1496,7 +1501,7 @@ $(document).ready(function(){
         select_selected_character(this_chid);
     }
     $("#send_textarea").keypress(function (e) {
-        if(e.which === 13 && !e.shiftKey && is_send_press == false) {
+        if(e.which === 13 && !e.shiftKey && is_send_press == false && !isMobile) {
             hideSwipeButtons();
             is_send_press = true;
             e.preventDefault();
@@ -1775,14 +1780,16 @@ $(document).ready(function(){
         saveSettings();
 
     });
-    $('#logo_block').click(function(event) {  
+    $('#bg_menu_button').click(function(event) {  
         if(!bg_menu_toggle){
-            $('#chara_cloud').transition({  
-                marginLeft: "170px",
-                duration: 300,
-                easing: "",
-                complete: function() {  }
-            });
+            if(!isMobile){
+                $('#chara_cloud').transition({  
+                    marginLeft: "170px",
+                    duration: 300,
+                    easing: "",
+                    complete: function() {  }
+                });
+            }
             designs.forEach(function(item, i){
                 $('#style_button'+i).css('opacity', 0.0);
                 $('#style_button'+i).transition({ y: '-10px', opacity: 0.0, duration: 0});
@@ -1800,12 +1807,14 @@ $(document).ready(function(){
                 complete: function() { bg_menu_toggle = true; $('#bg_menu_content').css("overflow-y", "auto");}
               });
         }else{
-            $('#chara_cloud').transition({  
-                marginLeft: "130px",
-                duration: 300,
-                easing: "",
-                complete: function() {  }
-            });
+            if(!isMobile){
+                $('#chara_cloud').transition({  
+                    marginLeft: "130px",
+                    duration: 300,
+                    easing: "",
+                    complete: function() {  }
+                });
+            }
             designs.forEach(function(item, i){
                 setTimeout(() => {
                     $('#style_button'+i).transition({ y: '-15px',opacity: 0.0, duration: 100});
@@ -2385,6 +2394,10 @@ $(document).ready(function(){
         if(is_send_press == false && count_view_mes > 1){
             hideSwipeButtons();
             is_send_press = true;
+            if(this_edit_mes_id === chat.length-1) {
+                this_edit_target_id = undefined;
+                this_edit_mes_id = undefined;
+            }
             Generate('regenerate');
         }
     });
@@ -2633,10 +2646,10 @@ $(document).ready(function(){
             $('#novel_api').css("display", "none");
             $('#openai_api').css("display","none");
             
-            $('#master_settings_koboldai_block').css("display", "grid");
+            $('#master_settings_koboldai_block').css("display", "list-item");
             $('#master_settings_novelai_block').css("display", "none");
             $('#master_settings_openai_block').css("display", "none");
-            $('#singleline_toggle').css("display", "grid");
+            $('#singleline_toggle').css("display", "list-item");
 
             main_api = 'kobold';
         }
@@ -2645,7 +2658,7 @@ $(document).ready(function(){
             $('#novel_api').css("display", "block");
             $('#openai_api').css("display","none");
             $('#master_settings_koboldai_block').css("display", "none");
-            $('#master_settings_novelai_block').css("display", "grid");
+            $('#master_settings_novelai_block').css("display", "list-item");
             $('#master_settings_openai_block').css("display", "none");
             $('#singleline_toggle').css("display", "none");
 
@@ -2657,7 +2670,7 @@ $(document).ready(function(){
             $('#openai_api').css("display","block");
             $('#master_settings_koboldai_block').css("display", "none");
             $('#master_settings_novelai_block').css("display", "none");
-            $('#master_settings_openai_block').css("display", "grid");
+            $('#master_settings_openai_block').css("display", "list-item");
             $('#singleline_toggle').css("display", "none");
             main_api = 'openai';
         }
@@ -2980,7 +2993,6 @@ $(document).ready(function(){
                     }
                     
                     charaCloudServer = data.charaCloudServer;
-                    charaCloudMode = data.charaCloudMode;
                     characterFormat = data.characterFormat;
                     
                     designs = data.designs;
@@ -3489,6 +3501,14 @@ $(document).ready(function(){
             });
         }
     }
+    function recalculateChatMesids() {
+        const childs = $('#chat')[0].childNodes;
+        for(let index = 0; index < childs.length; index++) {
+            const child = childs[index];
+            child.setAttribute("mesid", index);
+            child.setAttribute("class", index === childs.length - 1 ? "mes last_mes" : "mes");
+        }
+    }
 
     $(document).on('click', '.mes_edit', function(){
         if(this_chid == undefined){
@@ -3520,6 +3540,19 @@ $(document).ready(function(){
             root.find('.mes_text').empty();
             toggleEdit(root, true);
             this_edit_mes_id = edit_mes_id;
+            root.find('.mes_up').attr('class', this_edit_mes_id == 0 ? "mes_up disabled" : "mes_up");
+            root.find('.mes_down').attr('class', this_edit_mes_id == chat.length - 1 ? "mes_down disabled" : "mes_down");
+
+            if(chat[this_edit_mes_id].chid === undefined && !chat[this_edit_mes_id].is_user) {
+                chat[this_edit_mes_id].chid = parseInt(this_chid);
+            }
+
+            let nameSelect = root.find(".name_select");
+                nameSelect.css("display", "block");
+                nameSelect.empty();
+                nameSelect.append('<option value="-1" class="player"'+ (chat[this_edit_mes_id].is_user ? " selected=\"selected\"" : "") +'>'+name1+'</option>');
+                nameSelect.append('<option value="'+this_chid+'" class="host"'+ (chat[this_edit_mes_id].chid == parseInt(this_chid) ? " selected=\"selected\"" : "") +'>'+name2+'</option>');
+            root.find(".ch_name").css("display", "none");
 
             var text = chat[edit_mes_id]['mes'];
             if(chat[edit_mes_id]['is_user']){
@@ -3548,35 +3581,154 @@ $(document).ready(function(){
             }
         }
     });
-    $(document).on('click', '.mes_edit_cancel', function(){
+    $(document).on('click', '.mes_edit_clone', function(){
+        if(!confirm("Make a copy of this message?")) { return; }
+        const root = messageRoot($(this));
+        if(!root) { return; }
+        let oldScroll = $('#chat')[0].scrollTop;
+        let clone = JSON.parse(JSON.stringify(chat[this_edit_mes_id]));
+        clone.send_date++;
+
+        let nameSelect = root.find('.name_select');
+        let authorId = parseInt(nameSelect.val());
+        clone.is_user = authorId < 0;
+        clone.chid = authorId < 0 ? undefined : authorId;
+        clone.name = authorId < 0 ? name1 : characters[authorId].name;
+        clone.mes = root.find('.mes_text').children('.edit_textarea').val().trim();
+
+        chat.splice(this_edit_mes_id+1, 0, clone);
+        root.after(addOneMessage(clone));
+        recalculateChatMesids();
+        saveChat();
+        $('#chat')[0].scrollTop = oldScroll;
+    });
+    $(document).on('click', '.mes_edit_delete', function(){
+        if(!confirm("Are you sure you want to delete this message?")) { return; }
+        const root = messageRoot($(this));
+        if(!root) { return; }
+        chat.splice(this_edit_mes_id, 1);
+        this_edit_target_id = undefined;
+        this_edit_mes_id = undefined;
+        root.remove();
+        count_view_mes--;
+        recalculateChatMesids();
+        saveChat();
+        hideSwipeButtons();
         showSwipeButtons();
-        //var text = $(this).parent().parent().children('.mes_text').children('.edit_textarea').val();
-        var text = chat[this_edit_mes_id]['mes'];
+    });
+    $(document).on('click', '.mes_up', function(){
+        if(this_edit_mes_id <= 0 && this_edit_target_id === undefined) { return; }
+        this_edit_mes_id = parseInt(this_edit_mes_id);
+        if(this_edit_target_id === undefined) {
+            this_edit_target_id = this_edit_mes_id - 1;
+        } else {
+            this_edit_target_id--;
+        }
+        const root = messageRoot($(this));
+        if(!root) { return; }
+        root.attr('mesid', this_edit_target_id);
+        root.prev().attr('mesid', this_edit_target_id+1);
+        root.insertBefore(root.prev());
+        $(this).parent().children('.mes_up').attr('class', this_edit_target_id == 0 ? "mes_up disabled" : "mes_up");
+        $(this).parent().children('.mes_down').attr('class', this_edit_target_id == chat.length - 1 ? "mes_down disabled" : "mes_down");
+    });
+    $(document).on('click', '.mes_down', function(){
+        if(this_edit_mes_id >= chat.length-1 && this_edit_target_id === undefined) { return; }
+        this_edit_mes_id = parseInt(this_edit_mes_id);
+        if(this_edit_target_id === undefined) {
+            this_edit_target_id = this_edit_mes_id + 1;
+        } else {
+            this_edit_target_id++;
+        }
+        const root = messageRoot($(this));
+        if(!root) { return; }
+        root.attr('mesid', this_edit_target_id);
+        root.next().attr('mesid', this_edit_target_id-1);
+        root.insertAfter(root.next());
+        $(this).parent().children('.mes_up').attr('class', this_edit_target_id == 0 ? "mes_up disabled" : "mes_up");
+        $(this).parent().children('.mes_down').attr('class', this_edit_target_id == chat.length - 1 ? "mes_down disabled" : "mes_down");
+    });
+    $(document).on('change', '.name_select', function(){
+        const root = messageRoot($(this));
+        if(!root) { return; }
+        let to_chid = parseInt($(this).val());
+        let toAvatar = to_chid < 0 ? "User Avatars/" + user_avatar : "characters/" + characters[to_chid].avatar;
+        root.find(".avt_img").attr("src", toAvatar + "#t=" + Date.now());
+    });
+    $(document).on('click', '.mes_edit_cancel', function(){
+        hideSwipeButtons();
+        const mes = chat[this_edit_mes_id];
+        const text = mes.mes;
 
         const root = messageRoot($(this));
         if(!root) { return; }
         toggleEdit(root, false);
+
+        root.find('.avt_img').attr("src", getMessageAvatar(mes));
+        let nameSelect = root.find('.name_select');
+            nameSelect.empty();
+            nameSelect.css("display", "none");
+        root.find('.ch_name').css("display", "block");
         root.find('.mes_text').empty();
         root.find('.mes_text').append(messageFormating(text,this_edit_mes_chname));
+        if(this_edit_target_id !== undefined && this_edit_target_id !== null && this_edit_target_id !== this_edit_mes_id) {
+            $('#chat')[0].insertBefore($('#chat')[0].childNodes[this_edit_target_id], $('#chat')[0].childNodes[this_edit_mes_id < this_edit_target_id ? this_edit_mes_id : this_edit_mes_id+1]);
+            recalculateChatMesids();
+        }
+        this_edit_target_id = undefined;
         this_edit_mes_id = undefined;
+        showSwipeButtons();
     });
     $(document).on('click', '.mes_edit_done', function(){
         showSwipeButtons();
         messageEditDone($(this));
     });
     function messageEditDone(div){
-        showSwipeButtons();
         const root = messageRoot(div);
         if(!root) { return; }
+        hideSwipeButtons();
         var text = root.find('.mes_text').children('.edit_textarea').val();
+        const message = chat[this_edit_mes_id];
         text = text.trim();
-        chat[this_edit_mes_id]['mes'] = text;
-        if(chat[this_edit_mes_id]['swipe_id'] !== undefined){
-            chat[this_edit_mes_id]['swipes'][chat[this_edit_mes_id]['swipe_id']] = text;
+        message.mes = text;
+
+        let nameSelect = root.find('.name_select');
+        let authorId = parseInt(nameSelect.val());
+        message.is_user = authorId < 0;
+        message.chid = authorId < 0 ? undefined : authorId;
+        message.name = authorId < 0 ? name1 : characters[authorId].name;
+        nameSelect.empty();
+        nameSelect.css("display", "none");
+        let chName = root.find('.ch_name');
+            chName.html(message.name);
+            chName.css("display", "block");
+
+        if(message['swipe_id'] !== undefined){
+            message['swipes'][message['swipe_id']] = text;
         }
         root.find('.mes_text').empty();
         toggleEdit(root, false);
         root.find('.mes_text').append(messageFormating(text,this_edit_mes_chname));
+        if(this_edit_target_id !== undefined && this_edit_target_id !== this_edit_mes_id) {
+            let date = message.send_date;
+            chat.splice(this_edit_target_id, 0, chat.splice(this_edit_mes_id, 1)[0]);
+            if(this_edit_target_id < this_edit_mes_id) {
+                for(let i = this_edit_target_id; i < this_edit_mes_id; i++) {
+                    chat[i].send_date = chat[i+1].send_date;
+                }
+                message.send_date = date;
+            } else {
+                for(let i = this_edit_target_id; i > this_edit_mes_id; i--) {
+                    chat[i].send_date = chat[i-1].send_date;
+                }
+                message.send_date = date;
+            }
+            for(let i = 0; i < div.parent().parent().parent().parent().children().length; i++) {
+                div.parent().parent().parent().parent().children().eq(i).attr("mesid", i);
+            }
+        }
+        showSwipeButtons();
+        this_edit_target_id = undefined;
         this_edit_mes_id = undefined;
         saveChat();
     }
@@ -4190,7 +4342,7 @@ $(document).ready(function(){
     //**************************************************************//
     //**************************CHARA CLOUD*************************//
     $('#chat_header_back_button').click(function(){
-        if(charaCloud.isOnline() && charaCloudMode){
+        if(charaCloud.isOnline() && settings.characloud){
             $('#shell').css('display', 'none');
             $('#chara_cloud').css('display', 'block');
             $('#chara_cloud').css('opacity', 0.0);
@@ -4228,7 +4380,7 @@ $(document).ready(function(){
 
     characloud_characters_rows = [];
     async function charaCloudInit(){
-        if(charaCloudMode){
+        if(settings.characloud){
             charaCloudServerStatus();
             
             let characloud_characters_board = await charaCloud.getAllCharacters();
@@ -4270,15 +4422,10 @@ $(document).ready(function(){
                         if(this_discr.length == 0){
                             this_discr = "Hello, I'm "+item.name;
                         }
-                        if(this_discr.length > 120){
-                            this_discr = this_discr.substr(0,120);
+                        if(this_discr.length > 2000){
+                            this_discr = this_discr.substr(0,2000);
                         }
                         $('#characloud_character_block'+char_i).children('.characloud_character_block_card').children( '.characloud_character_block_description' ).text($.trim(this_discr));
-                        while(parseInt($('#characloud_character_block'+char_i).children('.characloud_character_block_card').children( '.characloud_character_block_description' ).css('height').replace('px', '')) > 40 && j < 100){
-                            this_discr = this_discr.slice(0,this_discr.length-5);
-                            $('#characloud_character_block'+char_i).children('.characloud_character_block_card').children( '.characloud_character_block_description' ).text($.trim(this_discr)+'...');
-                            j++;
-                        }
                         characloud_characters[char_i] = item;
                         char_i++;
                     });
@@ -4486,13 +4633,24 @@ $(document).ready(function(){
             });
         }else{
             is_nav_toggle = false;
-            $('#chara_cloud').transition({  
-                width: "calc(100vw - 180px)",
-                duration: 140,
-                delay: 20,
-                easing: "ease-in-out",
-                complete: function() {  }
-            });
+            if(isMobile){
+                $('#chara_cloud').transition({  
+                    width: "90%",
+                    duration: 140,
+                    delay: 20,
+                    easing: "ease-in-out",
+                    complete: function() {  }
+                });
+            } else {
+                $('#chara_cloud').transition({  
+                    width: "calc(100vw - 180px)",
+                    duration: 140,
+                    delay: 20,
+                    easing: "ease-in-out",
+                    complete: function() {  }
+                });
+            }
+            
         }
     });
     
