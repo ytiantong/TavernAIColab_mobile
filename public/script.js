@@ -628,7 +628,8 @@ $(document).ready(function(){
             if(this_chid === undefined) {
                 avatarImg = "img/chloe.png";
             } else {
-                mes.chid = mes.chid || parseInt(this_chid);
+                //mes.chid = mes.chid || parseInt(this_chid);
+                mes.chid = parseInt(this_chid); // TODO: properly establish persistent ids
                 avatarImg = characters[mes.chid].avatar == 'none' ? "img/fluffy.png" : "characters/"+characters[this_chid].avatar + "#t=" + Date.now();
             }
         } else {
@@ -642,6 +643,7 @@ $(document).ready(function(){
         generatedPromtCache = '';
         var avatarImg = getMessageAvatar(mes);
         if(!mes.is_user){
+            mes.chid = this_chid; // TODO: properly establish persistent ids
             characterName = characters[mes.chid] ? characters[mes.chid].name : "Chloe";
         }
         if(count_view_mes == 0){
