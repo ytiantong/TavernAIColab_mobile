@@ -29,16 +29,10 @@ const config = require(path.join(process.cwd(), './config.conf'));
 const server_port = config.port;
 const whitelist = config.whitelist;
 const whitelistMode = config.whitelistMode;
-let listenIp = config.listenIp || '127.0.0.1';
-
-if(!whitelistMode || whitelist.length > 1){
-    listenIp = '0.0.0.0';
-}
 const autorun = config.autorun;
 const characterFormat = config.characterFormat;
 const charaCloudMode = config.charaCloudMode;
 const charaCloudServer = config.charaCloudServer;
-
 
 var Client = require('node-rest-client').Client;
 var client = new Client();
@@ -72,7 +66,7 @@ var response_getlastversion;
 var api_key_novel;
 var api_key_openai;
 
-var is_colab = false;
+var is_colab = true;
 var charactersPath = 'public/characters/';
 var chatsPath = 'public/chats/';
 if (is_colab && process.env.googledrive == 2){
@@ -238,9 +232,6 @@ app.post("/generate", jsonParser, function(request, response_generate = response
                         //temperature: request.body.temperature,
                         //max_length: request.body.max_length
                         };
-    if(request.body.singleline) {
-        this_settings.singleline = true
-    }
                         
     if(request.body.gui_settings == false){
         var sampler_order = [request.body.s1,request.body.s2,request.body.s3,request.body.s4,request.body.s5,request.body.s6,request.body.s7];
@@ -262,9 +253,6 @@ app.post("/generate", jsonParser, function(request, response_generate = response
                         typical: request.body.typical,
                         sampler_order: sampler_order
                         };
-        if(request.body.singleline) {
-            this_settings.singleline = true
-        }
     }
 
     console.log(this_settings);
@@ -423,9 +411,7 @@ function checkServer(){
 
 //***************** Main functions
 function checkCharaProp(prop) {
-  return (String(prop) || '')
-      .replace(/[\u2018\u2019‘’]/g, "'")
-      .replace(/[\u201C\u201D“”]/g, '"');
+  return String(prop) || '';
 }
 function charaFormatData(data){
     let name;
@@ -771,19 +757,16 @@ app.post("/getcharacters", jsonParser, async function(request, response) {
       let jsonObject;
 
       try {
-        
         jsonObject = json5.parse(imgData);
         jsonObject.avatar = item;
         characters[i] = jsonObject;
         i++;
       } catch (error) {
         if (error instanceof SyntaxError) {
-          console.error("Character info from index " +i+ " is not valid JSON!", error);
+          console.log(`String [${i}] is not valid JSON!`);
         } else {
-          console.error("An unexpected error loading character index " +i+ " occurred.", error);
+          console.log(`An unexpected error occurred: ${error}`);
         }
-        console.error("Pre-parsed character data:");
-        console.error(imgData);
       }
     }
 
@@ -1197,35 +1180,21 @@ app.post("/generate_openai", jsonParser, function(request, response_generate_ope
     };
     
     client.post(api_openai+request_path,args, function (data, response) {
-        try {
-            if(request.body.model === 'gpt-3.5-turbo' || request.body.model === 'gpt-3.5-turbo-0301'){
-                console.log(data);
-                if(data.choices[0].message !== undefined){
-                    console.log(data.choices[0].message);
-                }
-
-
-            }else{
-                console.log(data);
-            }
-            console.log(response.statusCode);
-            if(response.statusCode <= 299){
-                response_generate_openai.send(data);
-            }
-            if(response.statusCode == 401){
-                console.log('Invalid Authentication');
-                response_generate_openai.send({error: true});
-            }
-            if(response.statusCode == 429){
-                console.log('Rate limit reached for requests');
-                response_generate_openai.send({error: true});
-            }
-            if(response.statusCode == 500){
-                console.log('The server had an error while processing your request');
-                response_generate_openai.send({error: true});
-            }
-        }catch (error) {
-            console.log("An error occurred: " + error);
+        console.log(data);
+        console.log(response.statusCode);
+        if(response.statusCode <= 299){
+            response_generate_openai.send(data);
+        }
+        if(response.statusCode == 401){
+            console.log('Invalid Authentication');
+            response_generate_openai.send({error: true});
+        }
+        if(response.statusCode == 429){
+            console.log('Rate limit reached for requests');
+            response_generate_openai.send({error: true});
+        }
+        if(response.statusCode == 500){
+            console.log('The server had an error while processing your request');
             response_generate_openai.send({error: true});
         }
     }).on('error', function (err) {
@@ -1545,7 +1514,7 @@ app.post("/characloud_serverstatus", jsonParser, function(request, response_char
     }
 });
 
-app.listen(server_port, listenIp, function() {
+app.listen(server_port, function() {
     if(process.env.colab !== undefined){
         if(process.env.colab == 2){
             is_colab = true;
