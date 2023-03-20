@@ -1000,6 +1000,7 @@ input[type=submit], input[type=button] {
 }
 #colab_shadow_popup {
     z-index: 2298;
+    display: block;
 }
 #colab_popup_text {
     float: left;
