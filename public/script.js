@@ -784,7 +784,6 @@ $(document).ready(function(){
                 if(type !== 'swipe'){
                     textareaText = $("#send_textarea").val();
                     $("#send_textarea").val('');
-                    $("#send_textarea").attr('style', 'height:40px')
                 }
             }
             //$("#send_textarea").attr("disabled","disabled");
